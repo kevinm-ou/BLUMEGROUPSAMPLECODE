@@ -14,6 +14,8 @@
 #include <omp.h>
 using namespace std;
 
+//run with
+// mpirun -np YOURNUMOFPROCESSORSHERE BandedExampleCode.mpi
 
 void GetStats(int numiterations, double* timings, double* statvalues){
 	//statvalues is a 2 values array
