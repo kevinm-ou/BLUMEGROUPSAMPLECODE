@@ -1,0 +1,4 @@
+*.mpi
+*.sout
+*.out
+*.o
