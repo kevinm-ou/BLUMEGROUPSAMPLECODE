@@ -33,22 +33,19 @@ LFLAGSSerial := -qmkl=parallel -L${MKLROOT}/lib/intel64 -I/${MKLROOT}/include -D
 
 #Source files:
 
-OBJ1 := BandedExampleCode.o
-TARGET1 := BandedExampleCode.mpi
-OBJ2 := BandedExampleCodeBasic.o
-TARGET2 := BandedExampleCodeBasic.mpi
-OBJ3 := MKLSerialBandedCode.o
-TARGET3 := MKLSerialBandedCode.sout
+
+OBJ1 := BandedExampleCodeBasic.o
+TARGET1 := BandedExampleCodeBasic.mpi
+OBJ2 := MKLSerialBandedCode.o
+TARGET2 := MKLSerialBandedCode.sout
 
 
-default: $(TARGET1) $(TARGET2) $(TARGET3)
+default: $(TARGET1) $(TARGET2)
 $(TARGET1): $(OBJ1)
 	$(CXX) $(CXXFLAGS) $(LFLAGS) $^ -o $@
 $(TARGET2): $(OBJ2)
-	$(CXX) $(CXXFLAGS) $(LFLAGS) $^ -o $@
-$(TARGET3): $(OBJ3)
 	$(CXX) $(CXXFLAGS) $(LFLAGSSerial) $^ -o $@
-TARGETS := $(TARGET1) $(TARGET2) $(TARGET3)
+TARGETS := $(TARGET1) $(TARGET2)
 
 
 all: $(TARGETS)

@@ -63,13 +63,15 @@ int main(int argc, char **argv) {
 	LWORK = LAF;
 	LAF_int = LAF;
 	LWORK_int = LAF;
+	//LAF and LWORK are workspace allocations needed for banded solver calls
+	//Usually each call has a seperate workspace size but we will use a driver in this example, 
+	//i.e., only use WORK and LWORK
 	//we now declare more helping variables
 	MDESC DESCA,DESCB, DESCA_local,DESCB_local, IPIV;
 	int FILL_IN;
 
 	//local arays
 	double *WORK;//[LWORK];
-	//AF = (double *)calloc(LAF,sizeof(double)) ;
 	WORK = (double *) mkl_calloc(LWORK_int,sizeof(double),64) ;
 	//we now initialize the process grid
 	NPROW =1; //one row
@@ -179,25 +181,28 @@ int main(int argc, char **argv) {
 		cout<<"Not on grid!!"<<endl;
 		goto stop;
 	}
-	//Test our input distributed arrays
-	cout<<"A Before=> Row: "<<MYROW<<", Col: "<<MYCOL<<":\t(";
-	for(int k = 0; k < mpA*nqA ;k++){
-	cout<<A[k] <<",\t";
-	}
-	cout<<")"<<endl;     
-	cout<<"B Before=> Row: "<<MYROW<<", Col: "<<MYCOL<<" , NB:"<<NB<<" (";
-	for(int k = 0; k < nqA ;k++){
-	cout<<B[k] <<",\t";
-	}
-	cout<<")"<<endl;  
+        
 	blacs_barrier(&ICTXT, "All");
-	//test b input
-	//cout<<"Initial "<<MYROW<<",\t"<<MYCOL<<"\t("<<B[0]<<","<<B[1]<<","<<B[2]<<")"<<endl;
-	
-	//goto stop;
 
-	//We finally are ready to give our descriptor arrays
-	//goto stop;
+    for (int id = 0; id < nprocs; ++id) { //looping over each id?
+    					                  // And putting up a barrier?
+		if(MYCOL == id){
+			//Test our input distributed arrays
+			cout<<"A Before=> Row: "<<MYROW<<", Col: "<<MYCOL<<":\t(";
+			for(int k = 0; k < mpA*nqA ;k++){
+				cout<<A[k] <<",\t";
+			}
+			cout<<")"<<endl;     
+			cout<<"B Before=> Row: "<<MYROW<<", Col: "<<MYCOL<<" , NB:"<<NB<<" (";
+			for(int k = 0; k < nqA ;k++){
+				cout<<B[k] <<",\t";
+			}
+			cout<<")"<<endl;  
+		}
+        blacs_barrier(&ICTXT, "All");
+    }  
+	blacs_barrier(&ICTXT, "All");
+
 		                                                        
 //
 //     DISTRIBUTE THE MATRIX ON THE PROCESS GRID
@@ -225,69 +230,36 @@ int main(int argc, char **argv) {
       DESCB[ 8 ] = 0;                     // Not used
 	//A (501,0,10,4,0,5,0)
 	//B (502,0,10,4,0,4,0)
-      //DESCA[ 0 ] = 501;                   // descriptor type
-      //DESCB[ 0 ] = 502;                   // descriptor type
 
-//Now the actual Scalapack calls are done
-/*
-**
-*     Perform LU factorization
-*
-*/
-//void	pdgbtrf(const MKL_INT* n, const MKL_INT* bwl, const MKL_INT* bwu, double* a, const MKL_INT* ja, const MKL_INT* desca, MKL_INT* ipiv, double* af, const MKL_INT* laf, double* work, const MKL_INT* lwork, MKL_INT* info);
-       /*
-       pdgbtrf( &N, &BWL, &BWU, A, &iONE, DESCA, IPIV,AF, &LAF, WORK, &LWORK, &INFO );
-       if(INFO!=0){
-       std::cout << endl<<"Info flag from PDGBTRF = "<<INFO<< ", Col = "<<MYCOL<<endl;
-	goto stop;
-       }  
 
-	//test A LU factorization
-	cout<<"A AFTER LU=> Row: "<<MYROW<<", Col: "<<MYCOL<<":\t(";
-	for(int k = 0; k < mpA*nqA ;k++){
-	cout<<A[k] <<",\t";
-	}
-	cout<<")"<<endl; 
-	*/
-	//We now run the sparse matrix solver
-/*
-*
-*     Solve using the LU factorization from PDGBTRF
-*
-*/	    
+	//Now the actual Scalapack calls are done
 
-	/*
-	pdgbtrs(&TRANS, &N, &BWL, &BWU, &iONE, A, &iONE, DESCA, IPIV, B, &iONE, DESCB, AF, &LAF, WORK, &LWORK, &INFO);
-       
-       if(INFO!=0){
-       std::cout << endl<<"Info flag from PDGBTRS = "<<INFO<< ", Col = "<<MYCOL<<endl;
-	goto stop;
-       }  
-       */
-        blacs_barrier(&ICTXT, "All");
-	cout <<"\nA PC:"<< MYCOL<<"\t Error:"<<INFO<<"\t("<<DESCA[0]<<","<<DESCA[1]<<","<<DESCA[2]<<","<<DESCA[3]<<","<<DESCA[4]<<","<<DESCA[5]<<","<<DESCA[6]<<","<<DESCA[7]<<","<<DESCA[8]<<")\n";
-	cout <<"\nB PC:"<< MYCOL<<"\t Error:"<<INFO2<<"\t("<<DESCB[0]<<","<<DESCB[1]<<","<<DESCB[2]<<","<<DESCB[3]<<","<<DESCB[4]<<","<<DESCB[5]<<","<<DESCB[6]<<","<<DESCB[7]<<","<<DESCB[8]<<")\n";
-        blacs_barrier(&ICTXT, "All");
-       //Perform driver call
-       pdgbsv(&N,&BWL, &BWU, &iONE, A, &iONE, DESCA, IPIV, B, &iONE, DESCB, WORK, &LWORK, &INFO);	
-       if(INFO!=0){
+
+    blacs_barrier(&ICTXT, "All");
+    //Perform driver call
+    pdgbsv(&N,&BWL, &BWU, &iONE, A, &iONE, DESCA, IPIV, B, &iONE, DESCB, WORK, &LWORK, &INFO);	
+    if(INFO!=0){ //Check for errors
        std::cout << endl<<"Info flag from pdgbsv = "<<INFO<< ", Col = "<<MYCOL<<endl;
 	goto stop;
        } 
        
-       
-           for (int id = 0; id < nprocs; ++id) { //looping over each id?
-    					     // And putting up a barrier?
+    //Print results
+    for (int id = 0; id < nprocs; ++id) { //looping over each id?
+    					                  // And putting up a barrier?
+		if(MYCOL == id){
+			//We test our final results
+			cout<<"\nB final: MyCOL "<<MYCOL<<" MY ROW "<<MYROW<<"\t(";
+			for(int k = 0; k < nqA ;k++){
+				cout<<B[k] <<",\t";
+			}
+			cout<<")"<<endl;
+		}
         blacs_barrier(&ICTXT, "All");
     }  
-	//We test our final results
-	cout<<"B final: MyCOL "<<MYCOL<<"MY ROW "<<MYROW<<"\t(";
-	for(int k = 0; k < nqA ;k++){
-	cout<<B[k] <<",\t";
-	}
-	cout<<")"<<endl;
 
 
+    blacs_barrier(&ICTXT, "All");
+	//free memory
 	goto stop;
 	stop:
 	mkl_free(A);
