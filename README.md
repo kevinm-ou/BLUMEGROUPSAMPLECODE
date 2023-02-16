@@ -40,4 +40,4 @@ The list of examples are below
   mpirun -np 3 ./2DCARTSETEMainScala.lmpi 
 2) EasyMakeFileDemo
   a) A simple demo on using Makefiles
-  Run make to make the compiled files
+  Run make to compile the files. It also shows what happens when you have a header file and if you don't want to use one. Best practice is to use one.
