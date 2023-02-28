@@ -41,3 +41,6 @@ The list of examples are below
 2) EasyMakeFileDemo
   a) A simple demo on using Makefiles
   Run make to compile the files. It also shows what happens when you have a header file and if you don't want to use one. Best practice is to use one.
+
+3) GSL-MakefileDemo
+In example 2, it gives a simple make file demo that should help in most cases. For GSL, you have to be strict in the order you link the gsl libraries in general. This folder gives an example makefile for gsl that is robust for compiling on most (being safe in language) systems. It has a main file that calls a gsl function and a subroutine file that calls a gsl function (plus the header for linking). Sample output is shown in the SampleOutput.md file. 

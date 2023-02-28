@@ -1,0 +1,44 @@
+Source: https://linuxconfig.org/how-to-switch-between-multiple-gcc-and-g-compiler-versions-on-ubuntu-20-04-lts-focal-fossa
+
+Step 1: Installing
+$ sudo apt install build-essential
+$ sudo apt -y install gcc-7 g++-7 gcc-8 g++-8 gcc-9 g++-9
+
+Step 2: Set alternatives
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 7
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 7
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9
+
+Step 3: Select alternatives
+$ sudo update-alternatives --config gcc
+There are 3 choices for the alternative gcc (providing /usr/bin/gcc).
+
+  Selection    Path            Priority   Status
+------------------------------------------------------------
+  0            /usr/bin/gcc-9   9         auto mode
+  1            /usr/bin/gcc-7   7         manual mode
+* 2            /usr/bin/gcc-8   8         manual mode
+  3            /usr/bin/gcc-9   9         manual mode
+Press  to keep the current choice[*], or type selection number: 
+
+or 
+$ sudo update-alternatives --config g++
+There are 3 choices for the alternative g++ (providing /usr/bin/g++).
+
+  Selection    Path            Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/g++-9   9         auto mode
+  1            /usr/bin/g++-7   7         manual mode
+  2            /usr/bin/g++-8   8         manual mode
+  3            /usr/bin/g++-9   9         manual mode
+
+Press  to keep the current choice[*], or type selection number:
+
+Step 4:
+Check version
+$ gcc --version
+$ g++ --version
+
